@@ -206,23 +206,52 @@ class _HomeState extends State<Home> {
                             color: Colors.blueGrey[800],
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Column(
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                entry.content,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      entry.content,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    Text(
+                                      _formatDate(entry.createdAt),
+                                      style: TextStyle(
+                                        color: Colors.white54,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Text(
-                                _formatDate(entry.createdAt),
-                                style: TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 12
-                                ),
-                              )
+                              Column(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.white54,
+                                    ),
+                                    onPressed: () {
+                                      _editEntry(index);
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.white54,
+                                    ),
+                                    onPressed: () {
+                                      _deleteEntry(index);
+                                    },
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         );
@@ -232,6 +261,51 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
+    );
+  }
+
+  void _deleteEntry(int index) {
+    setState(() {
+      entries.removeAt(index);
+    });
+    _saveEntries();
+  }
+
+  void _editEntry(int index) {
+    final TextEditingController editController = TextEditingController(
+      text: entries[index].content,
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.blueGrey[800],
+          title: const Text(
+            'Edit Entry',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: TextField(
+            controller: editController,
+            maxLines: 6,
+            style: TextStyle(color: Colors.white),
+            decoration: InputDecoration(border: OutlineInputBorder()),
+          ),
+          actions: [
+            TextButton(onPressed: (){Navigator.pop(context);}, child: Text('Cancel')),
+          ElevatedButton(onPressed: (){
+            final text = editController.text.trim();
+            if(text.isEmpty) return;
+
+            setState(() {
+              entries[index].content = text;
+            });
+            _saveEntries();
+            Navigator.pop(context);
+          }, child: Text('Save'))
+          ],
+        );
+      },
     );
   }
 }
