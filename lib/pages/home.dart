@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:journal_app/models/journal_entry.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -14,6 +15,23 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final TextEditingController _entryController = TextEditingController();
   List<JournalEntry> entries = [];
+
+  DateTime _selectedDate = DateTime.now();
+  bool _showCalendar = false;
+
+  Set<DateTime> get _entryDates {
+    return entries.map((e) {
+      return DateTime(e.createdAt.year, e.createdAt.month, e.createdAt.day);
+    }).toSet();
+  }
+
+  List<JournalEntry> get _filteredEntries {
+    return entries.where((entry) {
+      return entry.createdAt.year == _selectedDate.year &&
+          entry.createdAt.month == _selectedDate.month &&
+          entry.createdAt.day == _selectedDate.day;
+    }).toList();
+  }
 
   void _newEntry() {
     final text = _entryController.text.trim();
@@ -99,10 +117,19 @@ class _HomeState extends State<Home> {
                       padding: EdgeInsets.all(10),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.calendar_month,
-                            size: 28,
-                            color: Colors.white,
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _showCalendar = !_showCalendar;
+                              });
+                            },
+                            icon: Icon(
+                              _showCalendar
+                                  ? Icons.close
+                                  : Icons.calendar_today,
+                              size: 28,
+                              color: Colors.white,
+                            ),
                           ),
                           SizedBox(width: 20),
                           IconButton(
@@ -183,21 +210,60 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
+            if (_showCalendar)
+              TableCalendar(
+                firstDay: DateTime(2000),
+                lastDay: DateTime.now(),
+                focusedDay: _selectedDate,
+                selectedDayPredicate: (day) {
+                  return isSameDay(day, _selectedDate);
+                },
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    _selectedDate = selectedDay;
+                  });
+                },
+                calendarBuilders: CalendarBuilders(
+                  markerBuilder: (context, day, events) {
+                    final normalizedDay = DateTime(
+                      day.year,
+                      day.month,
+                      day.day,
+                    );
+
+                    if (_entryDates.contains(normalizedDay)) {
+                      return Positioned(
+                        bottom: 6,
+                        child: Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Colors.teal,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      );
+                    }
+                    return null;
+                  },
+                ),
+              ),
+
             SizedBox(height: 20),
             Expanded(
-              child: entries.isEmpty
+              child: _filteredEntries.isEmpty
                   ? Center(
                       child: Text(
-                        'No entries yet.\nStart writing today.',
+                        'No entries for this day.',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.white70, fontSize: 18),
                       ),
                     )
                   : ListView.builder(
                       padding: EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: entries.length,
+                      itemCount: _filteredEntries.length,
                       itemBuilder: (context, index) {
-                        final entry = entries[index];
+                        final entry = _filteredEntries[index];
 
                         return Container(
                           margin: EdgeInsets.only(bottom: 12),
@@ -292,17 +358,25 @@ class _HomeState extends State<Home> {
             decoration: InputDecoration(border: OutlineInputBorder()),
           ),
           actions: [
-            TextButton(onPressed: (){Navigator.pop(context);}, child: Text('Cancel')),
-          ElevatedButton(onPressed: (){
-            final text = editController.text.trim();
-            if(text.isEmpty) return;
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final text = editController.text.trim();
+                if (text.isEmpty) return;
 
-            setState(() {
-              entries[index].content = text;
-            });
-            _saveEntries();
-            Navigator.pop(context);
-          }, child: Text('Save'))
+                setState(() {
+                  entries[index].content = text;
+                });
+                _saveEntries();
+                Navigator.pop(context);
+              },
+              child: Text('Save'),
+            ),
           ],
         );
       },
