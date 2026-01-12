@@ -117,6 +117,21 @@ class _HomeState extends State<Home> {
                       padding: EdgeInsets.all(10),
                       child: Row(
                         children: [
+                          TextButton(  
+                            onPressed: () {
+                              setState(() {
+                                _selectedDate = DateTime.now();
+                                _showCalendar = false;
+                              });
+                            },
+                            child: Text(
+                              'Today',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                              ),
+                            ),
+                          ),
                           IconButton(
                             onPressed: () {
                               setState(() {
@@ -131,7 +146,7 @@ class _HomeState extends State<Home> {
                               color: Colors.white,
                             ),
                           ),
-                          SizedBox(width: 20),
+                          SizedBox(width: 10),
                           IconButton(
                             onPressed: () {
                               showModalBottomSheet(
@@ -221,6 +236,7 @@ class _HomeState extends State<Home> {
                 onDaySelected: (selectedDay, focusedDay) {
                   setState(() {
                     _selectedDate = selectedDay;
+                    _showCalendar = false;
                   });
                 },
                 calendarBuilders: CalendarBuilders(
