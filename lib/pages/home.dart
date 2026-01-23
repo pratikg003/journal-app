@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:journal_app/models/journal_entry.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:journal_app/providers/journal_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class Home extends StatefulWidget {
@@ -13,77 +12,41 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+    @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if(!mounted) return;
+      context.read<JournalProvider>().loadEntries();
+    });
+  }
+
   final TextEditingController _entryController = TextEditingController();
-  List<JournalEntry> entries = [];
 
   DateTime _selectedDate = DateTime.now();
   bool _showCalendar = false;
 
   Set<DateTime> get _entryDates {
-    return entries.map((e) {
-      return DateTime(e.createdAt.year, e.createdAt.month, e.createdAt.day);
-    }).toSet();
+    return context.watch<JournalProvider>().entryDates;
   }
 
   List<JournalEntry> get _filteredEntries {
-    return entries.where((entry) {
-      return entry.createdAt.year == _selectedDate.year &&
-          entry.createdAt.month == _selectedDate.month &&
-          entry.createdAt.day == _selectedDate.day;
-    }).toList();
+    return context.watch<JournalProvider>().entriesForDate(_selectedDate);
   }
 
   void _newEntry() {
     final text = _entryController.text.trim();
     if (text.isEmpty) return;
 
-    setState(() {
-      entries.insert(
-        0,
-        JournalEntry(
-          id: DateTime.now().toString(),
-          content: text,
-          createdAt: DateTime.now(),
-        ),
-      );
-      _saveEntries();
-    });
+    context.read<JournalProvider>().addEntry(text);
 
     _entryController.clear();
     Navigator.pop(context);
   }
 
-  Future<void> _saveEntries() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final entryList = entries
-        .map((entry) => jsonEncode(entry.toJson()))
-        .toList();
-
-    await prefs.setStringList('journal_entries', entryList);
-  }
-
-  Future<void> _loadEntries() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final List<String>? savedEntries = prefs.getStringList('journal_entries');
-
-    if (savedEntries == null) return;
-    setState(() {
-      entries = savedEntries
-          .map((entryString) => JournalEntry.fromJson(jsonDecode(entryString)))
-          .toList();
-    });
-  }
-
   String _formatDate(DateTime date) {
     return "${date.day}/${date.month}/${date.year}";
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadEntries();
   }
 
   @override
@@ -117,7 +80,7 @@ class _HomeState extends State<Home> {
                       padding: EdgeInsets.all(10),
                       child: Row(
                         children: [
-                          TextButton(  
+                          TextButton(
                             onPressed: () {
                               setState(() {
                                 _selectedDate = DateTime.now();
@@ -329,7 +292,8 @@ class _HomeState extends State<Home> {
                                       color: Colors.white54,
                                     ),
                                     onPressed: () {
-                                      _deleteEntry(index);
+      context.read<JournalProvider>().deleteEntry(index);
+                                      
                                     },
                                   ),
                                 ],
@@ -346,14 +310,15 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _deleteEntry(int index) {
-    setState(() {
-      entries.removeAt(index);
-    });
-    _saveEntries();
-  }
+  // void _deleteEntry(int index) {
+  //   setState(() {
+  //     entries.removeAt(index);
+  //   });
+  //   _saveEntries();
+  // }
 
   void _editEntry(int index) {
+    final entries = context.watch<JournalProvider>().entries;
     final TextEditingController editController = TextEditingController(
       text: entries[index].content,
     );
@@ -385,10 +350,7 @@ class _HomeState extends State<Home> {
                 final text = editController.text.trim();
                 if (text.isEmpty) return;
 
-                setState(() {
-                  entries[index].content = text;
-                });
-                _saveEntries();
+                context.read<JournalProvider>().editEntry(index, text);
                 Navigator.pop(context);
               },
               child: Text('Save'),

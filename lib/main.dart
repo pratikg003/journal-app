@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:journal_app/pages/home.dart';
+import 'package:journal_app/providers/journal_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ChangeNotifierProvider(create: (_) => JournalProvider(), child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
