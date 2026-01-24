@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:journal_app/models/journal_entry.dart';
 import 'package:journal_app/providers/journal_provider.dart';
+import 'package:journal_app/widgets/journal_calendar.dart';
 import 'package:provider/provider.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -12,12 +12,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
-    @override
+  @override
   void initState() {
     super.initState();
     Future.microtask(() {
-      if(!mounted) return;
+      if (!mounted) return;
       context.read<JournalProvider>().loadEntries();
     });
   }
@@ -27,13 +26,9 @@ class _HomeState extends State<Home> {
   DateTime _selectedDate = DateTime.now();
   bool _showCalendar = false;
 
-  Set<DateTime> get _entryDates {
-    return context.watch<JournalProvider>().entryDates;
-  }
-
-  List<JournalEntry> get _filteredEntries {
-    return context.watch<JournalProvider>().entriesForDate(_selectedDate);
-  }
+  // List<JournalEntry> get _filteredEntries {
+  //   return context.watch<JournalProvider>().entriesForDate(_selectedDate);
+  // }
 
   void _newEntry() {
     final text = _entryController.text.trim();
@@ -45,12 +40,27 @@ class _HomeState extends State<Home> {
     Navigator.pop(context);
   }
 
+  void _goToToday() {
+    setState(() {
+      _selectedDate = DateTime.now();
+      _showCalendar = false;
+    });
+  }
+
+  void _toggleCalendar() {
+    setState(() {
+      _showCalendar = !_showCalendar;
+    });
+  }
+
   String _formatDate(DateTime date) {
     return "${date.day}/${date.month}/${date.year}";
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<JournalProvider>();
+
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
       body: SafeArea(
@@ -81,12 +91,7 @@ class _HomeState extends State<Home> {
                       child: Row(
                         children: [
                           TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _selectedDate = DateTime.now();
-                                _showCalendar = false;
-                              });
-                            },
+                            onPressed: _goToToday,
                             child: Text(
                               'Today',
                               style: TextStyle(
@@ -96,11 +101,7 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                           IconButton(
-                            onPressed: () {
-                              setState(() {
-                                _showCalendar = !_showCalendar;
-                              });
-                            },
+                            onPressed: _toggleCalendar,
                             icon: Icon(
                               _showCalendar
                                   ? Icons.close
@@ -189,120 +190,20 @@ class _HomeState extends State<Home> {
               ),
             ),
             if (_showCalendar)
-              TableCalendar(
-                firstDay: DateTime(2000),
-                lastDay: DateTime.now(),
-                focusedDay: _selectedDate,
-                selectedDayPredicate: (day) {
-                  return isSameDay(day, _selectedDate);
-                },
-                onDaySelected: (selectedDay, focusedDay) {
+              JournalCalendar(
+                selectedDate: _selectedDate,
+                entryDates: context.watch<JournalProvider>().entryDates,
+                onDaySelected: (date) {
                   setState(() {
-                    _selectedDate = selectedDay;
+                    _selectedDate = date;
                     _showCalendar = false;
                   });
                 },
-                calendarBuilders: CalendarBuilders(
-                  markerBuilder: (context, day, events) {
-                    final normalizedDay = DateTime(
-                      day.year,
-                      day.month,
-                      day.day,
-                    );
-
-                    if (_entryDates.contains(normalizedDay)) {
-                      return Positioned(
-                        bottom: 6,
-                        child: Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            color: Colors.teal,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      );
-                    }
-                    return null;
-                  },
-                ),
               ),
 
             SizedBox(height: 20),
             Expanded(
-              child: _filteredEntries.isEmpty
-                  ? Center(
-                      child: Text(
-                        'No entries for this day.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white70, fontSize: 18),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: _filteredEntries.length,
-                      itemBuilder: (context, index) {
-                        final entry = _filteredEntries[index];
-
-                        return Container(
-                          margin: EdgeInsets.only(bottom: 12),
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.blueGrey[800],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      entry.content,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    Text(
-                                      _formatDate(entry.createdAt),
-                                      style: TextStyle(
-                                        color: Colors.white54,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      color: Colors.white54,
-                                    ),
-                                    onPressed: () {
-                                      _editEntry(index);
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.white54,
-                                    ),
-                                    onPressed: () {
-      context.read<JournalProvider>().deleteEntry(index);
-                                      
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+              child: _buildBody(provider),
             ),
           ],
         ),
@@ -310,15 +211,90 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // void _deleteEntry(int index) {
-  //   setState(() {
-  //     entries.removeAt(index);
-  //   });
-  //   _saveEntries();
-  // }
+  Widget _buildBody(JournalProvider provider) {
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (provider.error != null) {
+      return Center(
+        child: Text(
+          provider.error!,
+          style: const TextStyle(color: Colors.white70),
+        ),
+      );
+    }
+
+    final entries = provider.entriesForDate(_selectedDate);
+
+    if (entries.isEmpty) {
+      return const Center(
+        child: Text(
+          'No entries for this day.',
+          style: TextStyle(color: Colors.white70, fontSize: 18),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      itemCount: entries.length,
+      itemBuilder: (context, index) {
+        final entry = entries[index];
+        return _buildEntryTile(entry, index);
+      },
+    );
+  }
+
+  Widget _buildEntryTile(JournalEntry entry, int index) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey[800],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.content,
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+                Text(
+                  _formatDate(entry.createdAt),
+                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit, color: Colors.white54),
+                onPressed: () {
+                  _editEntry(index);
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.white54),
+                onPressed: () {
+                  context.read<JournalProvider>().deleteEntry(index);
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   void _editEntry(int index) {
-    final entries = context.watch<JournalProvider>().entries;
+    final entries = context.read<JournalProvider>().entries;
     final TextEditingController editController = TextEditingController(
       text: entries[index].content,
     );

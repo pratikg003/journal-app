@@ -6,8 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class JournalProvider extends ChangeNotifier {
   List<JournalEntry> _entries = [];
+  bool _isLoading = false;
+  String? _error;
 
   List<JournalEntry> get entries => _entries;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
 
   Set<DateTime> get entryDates {
     return _entries.map((e) {
@@ -24,14 +28,24 @@ class JournalProvider extends ChangeNotifier {
   }
 
   Future<void> loadEntries() async {
-    final prefs = await SharedPreferences.getInstance();
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try{
+      final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getStringList('journal_entries');
 
     if (saved == null) return;
 
     _entries = saved.map((e) => JournalEntry.fromJson(jsonDecode(e))).toList();
-
+    }
+    catch(_){
+      _error = "Failed to load journal entries.";
+    } finally {
+      _isLoading = false;
     notifyListeners();
+    }
   }
 
   Future<void> _saveEntries() async {
