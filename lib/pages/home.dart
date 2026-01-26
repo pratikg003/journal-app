@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:journal_app/models/journal_entry.dart';
+import 'package:journal_app/pages/journal_detail_screen.dart';
 import 'package:journal_app/providers/journal_provider.dart';
 import 'package:journal_app/widgets/journal_calendar.dart';
 import 'package:provider/provider.dart';
@@ -63,6 +64,30 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
+      drawer: Drawer(
+        backgroundColor: Colors.blueGrey[900],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Entries: ${provider.totalEntries}',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'This week: ${provider.entriesThisWeek()}',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -110,7 +135,7 @@ class _HomeState extends State<Home> {
                               color: Colors.white,
                             ),
                           ),
-                          SizedBox(width: 10),
+                          // SizedBox(width: 10),
                           IconButton(
                             onPressed: () {
                               showModalBottomSheet(
@@ -182,6 +207,14 @@ class _HomeState extends State<Home> {
                               color: Colors.white,
                             ),
                           ),
+                          Builder(
+                            builder: (context) => IconButton(
+                              onPressed: () {
+                                Scaffold.of(context).openDrawer();
+                              },
+                              icon: Icon(Icons.menu, color: Colors.white),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -202,9 +235,7 @@ class _HomeState extends State<Home> {
               ),
 
             SizedBox(height: 20),
-            Expanded(
-              child: _buildBody(provider),
-            ),
+            Expanded(child: _buildBody(provider)),
           ],
         ),
       ),
@@ -247,50 +278,72 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildEntryTile(JournalEntry entry, int index) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blueGrey[800],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: () async {
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => JournalDetailScreen(entry: entry)),
+        );
+
+        if (result != null && result is JournalEntry) {
+          _editEntryById(result.id);
+        }
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12),
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.blueGrey[800],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    entry.content,
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                  Text(
+                    _formatDate(entry.createdAt),
+                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Column(
               children: [
-                Text(
-                  entry.content,
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.white54),
+                  onPressed: () {
+                    _editEntry(index);
+                  },
                 ),
-                Text(
-                  _formatDate(entry.createdAt),
-                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.white54),
+                  onPressed: () {
+                    context.read<JournalProvider>().deleteEntry(index);
+                  },
                 ),
               ],
             ),
-          ),
-          Column(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit, color: Colors.white54),
-                onPressed: () {
-                  _editEntry(index);
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete, color: Colors.white54),
-                onPressed: () {
-                  context.read<JournalProvider>().deleteEntry(index);
-                },
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  void _editEntryById(String id) {
+    final index = context.read<JournalProvider>().entries.indexWhere(
+      (e) => e.id == id,
+    );
+
+    if (index != -1) {
+      _editEntry(index);
+    }
   }
 
   void _editEntry(int index) {
