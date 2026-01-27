@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:journal_app/models/journal_entry.dart';
 import 'package:journal_app/pages/journal_detail_screen.dart';
+import 'package:journal_app/providers/auth_provider.dart';
 import 'package:journal_app/providers/journal_provider.dart';
 import 'package:journal_app/widgets/journal_calendar.dart';
 import 'package:provider/provider.dart';
@@ -22,22 +23,21 @@ class _HomeState extends State<Home> {
     });
   }
 
-  final TextEditingController _entryController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
   bool _showCalendar = false;
 
-  // List<JournalEntry> get _filteredEntries {
-  //   return context.watch<JournalProvider>().entriesForDate(_selectedDate);
-  // }
-
   void _newEntry() {
-    final text = _entryController.text.trim();
-    if (text.isEmpty) return;
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+    if (content.isEmpty) return;
 
-    context.read<JournalProvider>().addEntry(text);
+    context.read<JournalProvider>().addEntry(title: title, content: content);
 
-    _entryController.clear();
+    _titleController.clear();
+    _contentController.clear();
     Navigator.pop(context);
   }
 
@@ -67,8 +67,24 @@ class _HomeState extends State<Home> {
       drawer: Drawer(
         backgroundColor: Colors.blueGrey[900],
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            SizedBox(height: 20,),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text(
+                'L O G O U T',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              onTap: () {
+                context.read<AuthProvider>().logout();
+                Navigator.pop(context);
+              },
+            ),
             Text(
               'Entries: ${provider.totalEntries}',
               style: TextStyle(
@@ -170,9 +186,27 @@ class _HomeState extends State<Home> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
+                                        TextField(
+                                          controller: _titleController,
+                                          maxLines: 1,
+                                          decoration: InputDecoration(
+                                            hintText: 'Title',
+                                            hintStyle: TextStyle(
+                                              color: Colors.white54,
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.blueGrey[700],
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                          ),
+                                          style: TextStyle(color: Colors.white),
+                                        ),
                                         const SizedBox(height: 15),
                                         TextField(
-                                          controller: _entryController,
+                                          controller: _contentController,
                                           maxLines: 6,
                                           decoration: InputDecoration(
                                             hintText: 'Write your thoughts...',
@@ -279,22 +313,40 @@ class _HomeState extends State<Home> {
 
   Widget _buildEntryTile(JournalEntry entry, int index) {
     return GestureDetector(
-      onTap: () async {
-        final result = await Navigator.push(
+      onTap: () {
+        Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => JournalDetailScreen(entry: entry)),
-        );
+          // MaterialPageRoute(builder: (_) => JournalDetailScreen(entryId: entry.id,)),
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                JournalDetailScreen(entryId: entry.id),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(1.0, 0.0);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOut;
 
-        if (result != null && result is JournalEntry) {
-          _editEntryById(result.id);
-        }
+                  final tween = Tween(
+                    begin: begin,
+                    end: end,
+                  ).chain(CurveTween(curve: curve));
+
+                  final offsetAnimation = animation.drive(tween);
+
+                  return SlideTransition(
+                    position: offsetAnimation,
+                    child: child,
+                  );
+                },
+          ),
+        );
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 12),
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.blueGrey[800],
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,8 +356,12 @@ class _HomeState extends State<Home> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    entry.content,
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    entry.title,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   Text(
                     _formatDate(entry.createdAt),
@@ -314,79 +370,79 @@ class _HomeState extends State<Home> {
                 ],
               ),
             ),
-            Column(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.white54),
-                  onPressed: () {
-                    _editEntry(index);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.white54),
-                  onPressed: () {
-                    context.read<JournalProvider>().deleteEntry(index);
-                  },
-                ),
-              ],
-            ),
+            // Column(
+            //   children: [
+            //     IconButton(
+            //       icon: const Icon(Icons.edit, color: Colors.white54),
+            //       onPressed: () {
+            //         _editEntry(index);
+            //       },
+            //     ),
+            //     IconButton(
+            //       icon: const Icon(Icons.delete, color: Colors.white54),
+            //       onPressed: () {
+            //         context.read<JournalProvider>().deleteEntry(index);
+            //       },
+            //     ),
+            //   ],
+            // ),
           ],
         ),
       ),
     );
   }
 
-  void _editEntryById(String id) {
-    final index = context.read<JournalProvider>().entries.indexWhere(
-      (e) => e.id == id,
-    );
+  // void _editEntryById(String id) {
+  //   final index = context.read<JournalProvider>().entries.indexWhere(
+  //     (e) => e.id == id,
+  //   );
 
-    if (index != -1) {
-      _editEntry(index);
-    }
-  }
+  //   if (index != -1) {
+  //     _editEntry(index);
+  //   }
+  // }
 
-  void _editEntry(int index) {
-    final entries = context.read<JournalProvider>().entries;
-    final TextEditingController editController = TextEditingController(
-      text: entries[index].content,
-    );
+  // void _editEntry(int index) {
+  //   final entries = context.read<JournalProvider>().entries;
+  //   final TextEditingController editController = TextEditingController(
+  //     text: entries[index].content,
+  //   );
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.blueGrey[800],
-          title: const Text(
-            'Edit Entry',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: TextField(
-            controller: editController,
-            maxLines: 6,
-            style: TextStyle(color: Colors.white),
-            decoration: InputDecoration(border: OutlineInputBorder()),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final text = editController.text.trim();
-                if (text.isEmpty) return;
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         backgroundColor: Colors.blueGrey[800],
+  //         title: const Text(
+  //           'Edit Entry',
+  //           style: TextStyle(color: Colors.white),
+  //         ),
+  //         content: TextField(
+  //           controller: editController,
+  //           maxLines: 6,
+  //           style: TextStyle(color: Colors.white),
+  //           decoration: InputDecoration(border: OutlineInputBorder()),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.pop(context);
+  //             },
+  //             child: Text('Cancel'),
+  //           ),
+  //           ElevatedButton(
+  //             onPressed: () {
+  //               final text = editController.text.trim();
+  //               if (text.isEmpty) return;
 
-                context.read<JournalProvider>().editEntry(index, text);
-                Navigator.pop(context);
-              },
-              child: Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //               context.read<JournalProvider>().editEntry(index, text);
+  //               Navigator.pop(context);
+  //             },
+  //             child: Text('Save'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 }

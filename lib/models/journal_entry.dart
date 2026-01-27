@@ -4,11 +4,13 @@
 
 class JournalEntry {
   final String id;
+  String title;
   String content;
   final DateTime createdAt;
 
   JournalEntry({
     required this.id,
+    required this.title,
     required this.content,
     required this.createdAt,
   });
@@ -16,6 +18,7 @@ class JournalEntry {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'title': title,
       'content': content,
       'createdAt': createdAt.toIso8601String(),
     };
@@ -24,6 +27,7 @@ class JournalEntry {
   factory JournalEntry.fromJson(Map<String, dynamic> json) {
     return JournalEntry(
       id: json['id'],
+      title: json['title'] ?? 'Untitled',
       content: json['content'],
       createdAt: DateTime.parse(json['createdAt']),
     );

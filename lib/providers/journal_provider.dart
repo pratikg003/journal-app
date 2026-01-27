@@ -65,12 +65,13 @@ class JournalProvider extends ChangeNotifier {
     await prefs.setStringList('journal_entries', list);
   }
 
-  void addEntry(String text) {
+  void addEntry({required String title, required String content}) {
     _entries.insert(
       0,
       JournalEntry(
         id: DateTime.now().toString(),
-        content: text,
+        title: title,
+        content: content,
         createdAt: DateTime.now(),
       ),
     );
@@ -78,15 +79,27 @@ class JournalProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void deleteEntry(int index) {
-    _entries.removeAt(index);
+  void deleteEntry(String id) {
+    _entries.removeWhere((e)=> e.id == id);
     _saveEntries();
     notifyListeners();
   }
 
-  void editEntry(int index, String text) {
-    _entries[index].content = text;
+  void editEntry(String id, String title, String content) {
+    final index = _entries.indexWhere((e)=> e.id == id);
+    if(index == -1) return;
+    _entries[index].title = title;
+    _entries[index].content = content;
     _saveEntries();
     notifyListeners();
   }
+
+  JournalEntry? getEntryById(String id) {
+  try {
+    return _entries.firstWhere((e) => e.id == id);
+  } catch (_) {
+    return null;
+  }
+}
+
 }
