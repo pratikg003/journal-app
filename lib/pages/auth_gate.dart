@@ -13,16 +13,17 @@ class AuthGate extends StatelessWidget {
 
     if (auth.isLoading){
       return Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: Colors.grey,),
         ),
       );
     }
 
-    if (!auth.isAuthenticated){
+    if (auth.isAuthenticated){
+      return Home();
+    } else {
       return LoginScreen();
     }
-
-    return Home();
   }
 }

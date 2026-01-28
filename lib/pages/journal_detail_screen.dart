@@ -97,41 +97,85 @@ class JournalDetailScreen extends StatelessWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return Scaffold(
-      backgroundColor: Colors.blueGrey[900],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.teal,
-        title: Text(
-          entry.title,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-          ),
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
         ),
         actions: [
           IconButton(
-            onPressed: () => _editEntry(context, entry),
-            icon: Icon(Icons.edit, color: Colors.white),
+            onPressed: () {},
+            icon: Icon(Icons.send, color: Colors.black),
           ),
           IconButton(
-            onPressed: () => _deleteEntry(context),
-            icon: Icon(Icons.delete, color: Colors.white),
+            onPressed: () {},
+            icon: Icon(Icons.more_vert, color: Colors.black),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              entry.content,
-              style: const TextStyle(color: Colors.white, fontSize: 18),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.title,
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  _formatDate(entry.createdAt),
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            Text(
-              _formatDate(entry.createdAt),
-              style: const TextStyle(color: Colors.white60, fontSize: 14),
+          ),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 25,
+                  horizontal: 20,
+                ),
+                child: SingleChildScrollView(
+                  child: Text(
+                    entry.content,
+                    style: const TextStyle(color: Colors.black, fontSize: 18, height: 1.5),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.blue[50],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              onPressed: () => _editEntry(context, entry),
+              icon: Icon(Icons.edit, color: Colors.black),
+            ),
+            IconButton(
+              onPressed: () => _deleteEntry(context),
+              icon: Icon(Icons.delete, color: Colors.red),
             ),
           ],
         ),

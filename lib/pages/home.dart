@@ -63,13 +63,13 @@ class _HomeState extends State<Home> {
     final provider = context.watch<JournalProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.blueGrey[900],
+      backgroundColor: Colors.white,
       drawer: Drawer(
         backgroundColor: Colors.blueGrey[900],
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(height: 20,),
+            SizedBox(height: 20),
             ListTile(
               leading: Icon(Icons.logout),
               title: Text(
@@ -107,153 +107,57 @@ class _HomeState extends State<Home> {
       body: SafeArea(
         child: Column(
           children: [
-            Material(
-              elevation: 7.0,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                color: Colors.teal,
-                // decoration: BoxDecoration(
-                //   color: Colors.teal[400]
-                // ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Journal',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Container(
-                      // color: Colors.white,
-                      padding: EdgeInsets.all(10),
-                      child: Row(
-                        children: [
-                          TextButton(
-                            onPressed: _goToToday,
-                            child: Text(
-                              'Today',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: _toggleCalendar,
-                            icon: Icon(
-                              _showCalendar
-                                  ? Icons.close
-                                  : Icons.calendar_today,
-                              size: 28,
-                              color: Colors.white,
-                            ),
-                          ),
-                          // SizedBox(width: 10),
-                          IconButton(
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+              color: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(5),
+                        margin: EdgeInsets.only(right: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[50],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Builder(
+                          builder: (context) => IconButton(
                             onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.blueGrey[800],
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(20),
-                                  ),
-                                ),
-                                builder: (context) {
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                      left: 20,
-                                      right: 20,
-                                      top: 20,
-                                      bottom:
-                                          MediaQuery.of(
-                                            context,
-                                          ).viewInsets.bottom +
-                                          20,
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          'New Entry',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        TextField(
-                                          controller: _titleController,
-                                          maxLines: 1,
-                                          decoration: InputDecoration(
-                                            hintText: 'Title',
-                                            hintStyle: TextStyle(
-                                              color: Colors.white54,
-                                            ),
-                                            filled: true,
-                                            fillColor: Colors.blueGrey[700],
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              borderSide: BorderSide.none,
-                                            ),
-                                          ),
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                        const SizedBox(height: 15),
-                                        TextField(
-                                          controller: _contentController,
-                                          maxLines: 6,
-                                          decoration: InputDecoration(
-                                            hintText: 'Write your thoughts...',
-                                            hintStyle: TextStyle(
-                                              color: Colors.white54,
-                                            ),
-                                            filled: true,
-                                            fillColor: Colors.blueGrey[700],
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              borderSide: BorderSide.none,
-                                            ),
-                                          ),
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                        const SizedBox(height: 15),
-                                        ElevatedButton(
-                                          onPressed: _newEntry,
-                                          child: const Text('Save'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
+                              Scaffold.of(context).openDrawer();
                             },
-
-                            icon: Icon(
-                              Icons.add,
-                              size: 28,
-                              color: Colors.white,
-                            ),
+                            icon: Icon(Icons.menu, color: Colors.black),
                           ),
-                          Builder(
-                            builder: (context) => IconButton(
-                              onPressed: () {
-                                Scaffold.of(context).openDrawer();
-                              },
-                              icon: Icon(Icons.menu, color: Colors.white),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                      Text(
+                        'Journal',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: _goToToday,
+                        icon: Icon(Icons.replay, color: Colors.black),
+                      ),
+                      IconButton(
+                        onPressed: _toggleCalendar,
+                        icon: Icon(
+                          _showCalendar ? Icons.close : Icons.calendar_today,
+                          size: 28,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
             if (_showCalendar)
@@ -268,10 +172,93 @@ class _HomeState extends State<Home> {
                 },
               ),
 
-            SizedBox(height: 20),
-            Expanded(child: _buildBody(provider)),
+            // SizedBox(height: 20),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+                ),
+                child: _buildBody(provider),
+              ),
+            ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.blueGrey[800],
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (context) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  top: 20,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'New Entry',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    TextField(
+                      controller: _titleController,
+                      maxLines: 1,
+                      decoration: InputDecoration(
+                        hintText: 'Title',
+                        hintStyle: TextStyle(color: Colors.white54),
+                        filled: true,
+                        fillColor: Colors.blueGrey[700],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 15),
+                    TextField(
+                      controller: _contentController,
+                      maxLines: 6,
+                      decoration: InputDecoration(
+                        hintText: 'Write your thoughts...',
+                        hintStyle: TextStyle(color: Colors.white54),
+                        filled: true,
+                        fillColor: Colors.blueGrey[700],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 15),
+                    ElevatedButton(
+                      onPressed: _newEntry,
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+        backgroundColor: Colors.white,
+        child: Icon(Icons.add, color: Colors.black, size: 30),
       ),
     );
   }
@@ -296,7 +283,11 @@ class _HomeState extends State<Home> {
       return const Center(
         child: Text(
           'No entries for this day.',
-          style: TextStyle(color: Colors.white70, fontSize: 18),
+          style: TextStyle(
+            color: Colors.blueGrey,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       );
     }
@@ -343,9 +334,9 @@ class _HomeState extends State<Home> {
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 12),
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.blueGrey[800],
+          color: Colors.blue,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -359,90 +350,20 @@ class _HomeState extends State<Home> {
                     entry.title,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   Text(
                     _formatDate(entry.createdAt),
-                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
             ),
-            // Column(
-            //   children: [
-            //     IconButton(
-            //       icon: const Icon(Icons.edit, color: Colors.white54),
-            //       onPressed: () {
-            //         _editEntry(index);
-            //       },
-            //     ),
-            //     IconButton(
-            //       icon: const Icon(Icons.delete, color: Colors.white54),
-            //       onPressed: () {
-            //         context.read<JournalProvider>().deleteEntry(index);
-            //       },
-            //     ),
-            //   ],
-            // ),
           ],
         ),
       ),
     );
   }
-
-  // void _editEntryById(String id) {
-  //   final index = context.read<JournalProvider>().entries.indexWhere(
-  //     (e) => e.id == id,
-  //   );
-
-  //   if (index != -1) {
-  //     _editEntry(index);
-  //   }
-  // }
-
-  // void _editEntry(int index) {
-  //   final entries = context.read<JournalProvider>().entries;
-  //   final TextEditingController editController = TextEditingController(
-  //     text: entries[index].content,
-  //   );
-
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         backgroundColor: Colors.blueGrey[800],
-  //         title: const Text(
-  //           'Edit Entry',
-  //           style: TextStyle(color: Colors.white),
-  //         ),
-  //         content: TextField(
-  //           controller: editController,
-  //           maxLines: 6,
-  //           style: TextStyle(color: Colors.white),
-  //           decoration: InputDecoration(border: OutlineInputBorder()),
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.pop(context);
-  //             },
-  //             child: Text('Cancel'),
-  //           ),
-  //           ElevatedButton(
-  //             onPressed: () {
-  //               final text = editController.text.trim();
-  //               if (text.isEmpty) return;
-
-  //               context.read<JournalProvider>().editEntry(index, text);
-  //               Navigator.pop(context);
-  //             },
-  //             child: Text('Save'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 }

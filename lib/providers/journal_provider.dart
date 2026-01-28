@@ -80,14 +80,14 @@ class JournalProvider extends ChangeNotifier {
   }
 
   void deleteEntry(String id) {
-    _entries.removeWhere((e)=> e.id == id);
+    _entries.removeWhere((e) => e.id == id);
     _saveEntries();
     notifyListeners();
   }
 
   void editEntry(String id, String title, String content) {
-    final index = _entries.indexWhere((e)=> e.id == id);
-    if(index == -1) return;
+    final index = _entries.indexWhere((e) => e.id == id);
+    if (index == -1) return;
     _entries[index].title = title;
     _entries[index].content = content;
     _saveEntries();
@@ -95,11 +95,10 @@ class JournalProvider extends ChangeNotifier {
   }
 
   JournalEntry? getEntryById(String id) {
-  try {
-    return _entries.firstWhere((e) => e.id == id);
-  } catch (_) {
-    return null;
+    try {
+      return _entries.firstWhere((e) => e.id == id);
+    } catch (_) {
+      return null;
+    }
   }
-}
-
 }
