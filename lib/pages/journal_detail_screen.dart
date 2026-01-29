@@ -15,17 +15,28 @@ class JournalDetailScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: Colors.blueGrey[800],
-        title: Text('Edit Entry', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.white,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text(
+              'Edit Entry',
+              style: TextStyle(
+                color: Colors.blue,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
             TextField(
               controller: titleController,
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.black87),
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.blueGrey[50],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
@@ -33,10 +44,13 @@ class JournalDetailScreen extends StatelessWidget {
             TextField(
               controller: contentController,
               maxLines: 5,
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.black87),
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.blueGrey[50],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
                 ),
               ),
             ),
@@ -45,7 +59,7 @@ class JournalDetailScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.white)),
+            child: Text('Cancel', style: TextStyle(color: Colors.red)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -56,7 +70,8 @@ class JournalDetailScreen extends StatelessWidget {
               );
               Navigator.pop(context);
             },
-            child: Text('Save'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[50]),
+            child: Text('Save', style: TextStyle(color: Colors.black87)),
           ),
         ],
       ),
@@ -67,16 +82,18 @@ class JournalDetailScreen extends StatelessWidget {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
         title: const Text('Delete Entry?'),
         content: const Text('This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: Colors.black87),),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey[50]),
+            child: const Text('Delete', style: TextStyle(color: Colors.red),),
           ),
         ],
       ),
@@ -156,7 +173,11 @@ class JournalDetailScreen extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Text(
                     entry.content,
-                    style: const TextStyle(color: Colors.black, fontSize: 18, height: 1.5),
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      height: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -169,13 +190,27 @@ class JournalDetailScreen extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            IconButton(
-              onPressed: () => _editEntry(context, entry),
-              icon: Icon(Icons.edit, color: Colors.black),
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(50)
+              ),
+              child: IconButton(
+                onPressed: () => _editEntry(context, entry),
+                icon: Icon(Icons.edit, color: Colors.black),
+              ),
             ),
-            IconButton(
-              onPressed: () => _deleteEntry(context),
-              icon: Icon(Icons.delete, color: Colors.red),
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(50)
+              ),
+              child: IconButton(
+                onPressed: () => _deleteEntry(context),
+                icon: Icon(Icons.delete, color: Colors.red),
+              ),
             ),
           ],
         ),

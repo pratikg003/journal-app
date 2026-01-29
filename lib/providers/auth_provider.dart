@@ -45,7 +45,6 @@ class AuthProvider extends ChangeNotifier{
     if(_rememberMe){
     await prefs.setBool('isAuthenticated', true);
     }
-
     _isLoading = false;
     notifyListeners();
   }

@@ -11,19 +11,13 @@ class AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
 
-    if (auth.isLoading){
+    if (auth.isLoading) {
       return Scaffold(
         backgroundColor: Colors.white,
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.grey,),
-        ),
+        body: Center(child: CircularProgressIndicator(color: Colors.grey)),
       );
     }
 
-    if (auth.isAuthenticated){
-      return Home();
-    } else {
-      return LoginScreen();
-    }
+    return auth.isAuthenticated ? const Home() : const LoginScreen();
   }
 }

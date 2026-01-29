@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:journal_app/models/journal_entry.dart';
 import 'package:journal_app/pages/journal_detail_screen.dart';
-import 'package:journal_app/providers/auth_provider.dart';
 import 'package:journal_app/providers/journal_provider.dart';
+import 'package:journal_app/widgets/app_drawer_widget.dart';
 import 'package:journal_app/widgets/journal_calendar.dart';
 import 'package:provider/provider.dart';
 
@@ -64,46 +64,9 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      drawer: Drawer(
-        backgroundColor: Colors.blueGrey[900],
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(height: 20),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text(
-                'L O G O U T',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onTap: () {
-                context.read<AuthProvider>().logout();
-                Navigator.pop(context);
-              },
-            ),
-            Text(
-              'Entries: ${provider.totalEntries}',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              'This week: ${provider.entriesThisWeek()}',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
+
+      drawer: AppDrawerWidget(),
+
       body: SafeArea(
         child: Column(
           children: [
@@ -191,9 +154,9 @@ class _HomeState extends State<Home> {
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            backgroundColor: Colors.blueGrey[800],
+            backgroundColor: Colors.white,
             shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
             ),
             builder: (context) {
               return Padding(
@@ -209,8 +172,8 @@ class _HomeState extends State<Home> {
                     Text(
                       'New Entry',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
+                        color: Colors.blue,
+                        fontSize: 26,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -220,15 +183,15 @@ class _HomeState extends State<Home> {
                       maxLines: 1,
                       decoration: InputDecoration(
                         hintText: 'Title',
-                        hintStyle: TextStyle(color: Colors.white54),
+                        hintStyle: TextStyle(color: Colors.black54),
                         filled: true,
-                        fillColor: Colors.blueGrey[700],
+                        fillColor: Colors.blueGrey[50],
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.black87),
                     ),
                     const SizedBox(height: 15),
                     TextField(
@@ -236,20 +199,26 @@ class _HomeState extends State<Home> {
                       maxLines: 6,
                       decoration: InputDecoration(
                         hintText: 'Write your thoughts...',
-                        hintStyle: TextStyle(color: Colors.white54),
+                        hintStyle: TextStyle(color: Colors.black54),
                         filled: true,
-                        fillColor: Colors.blueGrey[700],
+                        fillColor: Colors.blueGrey[50],
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                       ),
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.black87),
                     ),
                     const SizedBox(height: 15),
                     ElevatedButton(
                       onPressed: _newEntry,
-                      child: const Text('Save'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[50],
+                      ),
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(color: Colors.black87),
+                      ),
                     ),
                   ],
                 ),
@@ -307,7 +276,6 @@ class _HomeState extends State<Home> {
       onTap: () {
         Navigator.push(
           context,
-          // MaterialPageRoute(builder: (_) => JournalDetailScreen(entryId: entry.id,)),
           PageRouteBuilder(
             pageBuilder: (context, animation, secondaryAnimation) =>
                 JournalDetailScreen(entryId: entry.id),
@@ -356,7 +324,11 @@ class _HomeState extends State<Home> {
                   ),
                   Text(
                     _formatDate(entry.createdAt),
-                    style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
