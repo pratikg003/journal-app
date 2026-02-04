@@ -266,6 +266,7 @@ class _HomeState extends State<Home> {
       itemCount: entries.length,
       itemBuilder: (context, index) {
         final entry = entries[index];
+        // print('Rebuilding entry ${entry.id}');
         return _buildEntryTile(entry, index);
       },
     );

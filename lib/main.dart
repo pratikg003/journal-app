@@ -23,13 +23,14 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, auth, _) {
+    return Selector<AuthProvider, bool>(
+      selector: (_, auth) => auth.isAuthenticated,
+      builder: (context, isAuthenticated, _) {
         return MaterialApp(
           title: 'Journal App',
           home: const AuthGate(),
           onGenerateRoute: (settings) =>
-              appRouteGuard(settings, auth.isAuthenticated),
+              appRouteGuard(settings, isAuthenticated),
           debugShowCheckedModeBanner: false,
         );
       },
