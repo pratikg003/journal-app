@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:journal_app/models/journal_entry.dart';
 import 'package:journal_app/pages/journal_detail_screen.dart';
 import 'package:journal_app/providers/journal_provider.dart';
+import 'package:journal_app/routes/route_animation.dart';
 import 'package:journal_app/widgets/app_drawer_widget.dart';
 import 'package:journal_app/widgets/journal_calendar.dart';
 import 'package:provider/provider.dart';
@@ -34,10 +35,12 @@ class _HomeState extends State<Home> {
     final content = _contentController.text.trim();
     if (content.isEmpty) return;
 
-    context.read<JournalProvider>().addEntry(title: title, content: content);
+    context.read<JournalProvider>().addEntry(title: title, content: content, date: _selectedDate);
 
     _titleController.clear();
     _contentController.clear();
+    
+    FocusScope.of(context).unfocus();
     Navigator.pop(context);
   }
 
@@ -60,7 +63,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<JournalProvider>();
+    // final provider = context.watch<JournalProvider>();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -143,7 +146,11 @@ class _HomeState extends State<Home> {
                   color: Colors.blue[50],
                   borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
                 ),
-                child: _buildBody(provider),
+                child: Consumer<JournalProvider>(
+                  builder: (context, provider, child) {
+                    return _buildBody(provider);
+                  },
+                ),
               ),
             ),
           ],
@@ -266,7 +273,6 @@ class _HomeState extends State<Home> {
       itemCount: entries.length,
       itemBuilder: (context, index) {
         final entry = entries[index];
-        // print('Rebuilding entry ${entry.id}');
         return _buildEntryTile(entry, index);
       },
     );
@@ -274,31 +280,11 @@ class _HomeState extends State<Home> {
 
   Widget _buildEntryTile(JournalEntry entry, int index) {
     return GestureDetector(
+      key: ValueKey(entry.id),
       onTap: () {
         Navigator.push(
           context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                JournalDetailScreen(entryId: entry.id),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(1.0, 0.0);
-                  const end = Offset.zero;
-                  const curve = Curves.easeInOut;
-
-                  final tween = Tween(
-                    begin: begin,
-                    end: end,
-                  ).chain(CurveTween(curve: curve));
-
-                  final offsetAnimation = animation.drive(tween);
-
-                  return SlideTransition(
-                    position: offsetAnimation,
-                    child: child,
-                  );
-                },
-          ),
+          createSlideRoute(JournalDetailScreen(entryId: entry.id)),
         );
       },
       child: Container(

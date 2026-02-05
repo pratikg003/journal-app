@@ -65,14 +65,14 @@ class JournalProvider extends ChangeNotifier {
     await prefs.setStringList('journal_entries', list);
   }
 
-  void addEntry({required String title, required String content}) {
+  void addEntry({required String title, required String content, DateTime? date}) {
     _entries.insert(
       0,
       JournalEntry(
         id: DateTime.now().toString(),
         title: title,
         content: content,
-        createdAt: DateTime.now(),
+        createdAt: date ?? DateTime.now(),
       ),
     );
     _saveEntries();
