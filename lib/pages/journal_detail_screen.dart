@@ -8,76 +8,6 @@ class JournalDetailScreen extends StatelessWidget {
 
   const JournalDetailScreen({super.key, required this.entryId});
 
-  void _editEntry(BuildContext context, JournalEntry entry) {
-    final titleController = TextEditingController(text: entry.title);
-    final contentController = TextEditingController(text: entry.content);
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: Colors.white,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Edit Entry',
-              style: TextStyle(
-                color: Colors.blue,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: titleController,
-              style: TextStyle(color: Colors.black87),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.blueGrey[50],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: contentController,
-              maxLines: 5,
-              style: TextStyle(color: Colors.black87),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.blueGrey[50],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.red)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              context.read<JournalProvider>().editEntry(
-                entry.id,
-                titleController.text.trim(),
-                contentController.text.trim(),
-              );
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[50]),
-            child: Text('Save', style: TextStyle(color: Colors.black87)),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _deleteEntry(BuildContext context) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
@@ -88,12 +18,17 @@ class JournalDetailScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.black87),),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.black87),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey[50]),
-            child: const Text('Delete', style: TextStyle(color: Colors.red),),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueGrey[50],
+            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -194,10 +129,15 @@ class JournalDetailScreen extends StatelessWidget {
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(50)
+                borderRadius: BorderRadius.circular(50),
               ),
               child: IconButton(
-                onPressed: () => _editEntry(context, entry),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => EditEntryDialog(entry: entry),
+                  );
+                },
                 icon: Icon(Icons.edit, color: Colors.black),
               ),
             ),
@@ -205,7 +145,7 @@ class JournalDetailScreen extends StatelessWidget {
               padding: EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(50)
+                borderRadius: BorderRadius.circular(50),
               ),
               child: IconButton(
                 onPressed: () => _deleteEntry(context),
@@ -220,5 +160,97 @@ class JournalDetailScreen extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return "${date.day}/${date.month}/${date.year}";
+  }
+}
+
+class EditEntryDialog extends StatefulWidget {
+  final JournalEntry entry;
+  const EditEntryDialog({super.key, required this.entry});
+
+  @override
+  State<EditEntryDialog> createState() => _EditEntryDialogState();
+}
+
+class _EditEntryDialogState extends State<EditEntryDialog> {
+  late TextEditingController _titleController;
+  late TextEditingController _contentController;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.entry.title);
+    _contentController = TextEditingController(text: widget.entry.content);
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: Column(
+        children: [
+          Text(
+            'Edit Entry',
+            style: TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+            ),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            controller: _titleController,
+            style: TextStyle(color: Colors.black87),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.blueGrey[50],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            controller: _contentController,
+            maxLines: 5,
+            style: TextStyle(color: Colors.black87),
+            decoration: InputDecoration(
+              fillColor: Colors.blueGrey[50],
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text('Cancel', style: TextStyle(color: Colors.red)),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            context.read<JournalProvider>().editEntry(
+              widget.entry.id,
+              _titleController.text.trim(),
+              _contentController.text.trim(),
+            );
+            Navigator.pop(context);
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey[50]),
+          child: Text('Save', style: TextStyle(color: Colors.black87)),
+        ),
+      ],
+    );
   }
 }

@@ -1,13 +1,16 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:journal_app/models/journal_entry.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:journal_app/repositories/journal_repository.dart';
 
 class JournalProvider extends ChangeNotifier {
+  final JournalRepository _repository;
+
   List<JournalEntry> _entries = [];
   bool _isLoading = false;
   String? _error;
+
+  JournalProvider({required JournalRepository repository})
+    : _repository = repository;
 
   List<JournalEntry> get entries => _entries;
   bool get isLoading => _isLoading;
@@ -43,55 +46,48 @@ class JournalProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final saved = prefs.getStringList('journal_entries');
-
-      if (saved == null) return;
-
-      _entries = saved
-          .map((e) => JournalEntry.fromJson(jsonDecode(e)))
-          .toList();
+      _entries = await _repository.loadAllEntries();
     } catch (_) {
-      _error = "Failed to load journal entries.";
+      _error = "Failed to load journal entries";
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> _saveEntries() async {
-    final prefs = await SharedPreferences.getInstance();
-    final list = _entries.map((e) => jsonEncode(e.toJson())).toList();
-    await prefs.setStringList('journal_entries', list);
-  }
-
-  void addEntry({required String title, required String content, DateTime? date}) {
-    _entries.insert(
-      0,
-      JournalEntry(
-        id: DateTime.now().toString(),
-        title: title,
-        content: content,
-        createdAt: date ?? DateTime.now(),
-      ),
+  Future<void> addEntry({
+    required String title,
+    required String content,
+    DateTime? date,
+  }) async {
+    final newEntry = JournalEntry(
+      id: DateTime.now().toString(),
+      title: title,
+      content: content,
+      createdAt: date ?? DateTime.now(),
     );
-    _saveEntries();
+
+    _entries.insert(0, newEntry);
     notifyListeners();
+
+    await _repository.saveEntry(newEntry);
   }
 
-  void deleteEntry(String id) {
-    _entries.removeWhere((e) => e.id == id);
-    _saveEntries();
-    notifyListeners();
-  }
-
-  void editEntry(String id, String title, String content) {
+  Future<void> editEntry(String id, String title, String content) async {
     final index = _entries.indexWhere((e) => e.id == id);
     if (index == -1) return;
     _entries[index].title = title;
     _entries[index].content = content;
-    _saveEntries();
     notifyListeners();
+
+    await _repository.saveEntry(_entries[index]);
+  }
+
+  Future<void> deleteEntry(String id) async {
+    _entries.removeWhere((e) => e.id == id);
+    notifyListeners();
+
+    await _repository.deleteEntry(id);
   }
 
   JournalEntry? getEntryById(String id) {

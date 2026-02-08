@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:journal_app/pages/auth_gate.dart';
 import 'package:journal_app/providers/auth_provider.dart';
 import 'package:journal_app/providers/journal_provider.dart';
+import 'package:journal_app/repositories/journal_repository.dart';
 import 'package:journal_app/routes/route_guard.dart';
 import 'package:provider/provider.dart';
 
@@ -9,7 +10,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => JournalProvider()),
+        ChangeNotifierProvider(create: (_) => JournalProvider(repository: JournalRepository())),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: const MyApp(),
