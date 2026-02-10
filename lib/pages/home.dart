@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:journal_app/models/journal_entry.dart';
 import 'package:journal_app/pages/journal_detail_screen.dart';
 import 'package:journal_app/providers/journal_provider.dart';
 import 'package:journal_app/routes/route_animation.dart';
 import 'package:journal_app/widgets/app_drawer_widget.dart';
 import 'package:journal_app/widgets/journal_calendar.dart';
+import 'package:journal_app/widgets/journal_entry_card.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
@@ -35,11 +35,15 @@ class _HomeState extends State<Home> {
     final content = _contentController.text.trim();
     if (content.isEmpty) return;
 
-    context.read<JournalProvider>().addEntry(title: title, content: content, date: _selectedDate);
+    context.read<JournalProvider>().addEntry(
+      title: title,
+      content: content,
+      date: _selectedDate,
+    );
 
     _titleController.clear();
     _contentController.clear();
-    
+
     FocusScope.of(context).unfocus();
     Navigator.pop(context);
   }
@@ -55,10 +59,6 @@ class _HomeState extends State<Home> {
     setState(() {
       _showCalendar = !_showCalendar;
     });
-  }
-
-  String _formatDate(DateTime date) {
-    return "${date.day}/${date.month}/${date.year}";
   }
 
   @override
@@ -273,56 +273,16 @@ class _HomeState extends State<Home> {
       itemCount: entries.length,
       itemBuilder: (context, index) {
         final entry = entries[index];
-        return _buildEntryTile(entry, index);
-      },
-    );
-  }
-
-  Widget _buildEntryTile(JournalEntry entry, int index) {
-    return GestureDetector(
-      key: ValueKey(entry.id),
-      onTap: () {
-        Navigator.push(
-          context,
-          createSlideRoute(JournalDetailScreen(entryId: entry.id)),
+        return JournalEntryCard(
+          entry: entry,
+          onTap: () {
+            Navigator.push(
+              context,
+              createSlideRoute(JournalDetailScreen(entryId: entry.id)),
+            );
+          },
         );
       },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 12),
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.title,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    _formatDate(entry.createdAt),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
