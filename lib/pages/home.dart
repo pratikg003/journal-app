@@ -157,6 +157,7 @@ class _HomeState extends State<Home> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        key: const Key('add_entry_fab'),
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -186,6 +187,7 @@ class _HomeState extends State<Home> {
                     ),
                     SizedBox(height: 15),
                     TextField(
+                      key: const Key("title_field"),
                       controller: _titleController,
                       maxLines: 1,
                       decoration: InputDecoration(
@@ -202,6 +204,7 @@ class _HomeState extends State<Home> {
                     ),
                     const SizedBox(height: 15),
                     TextField(
+                      key: const Key("content_field"),
                       controller: _contentController,
                       maxLines: 6,
                       decoration: InputDecoration(
@@ -218,6 +221,7 @@ class _HomeState extends State<Home> {
                     ),
                     const SizedBox(height: 15),
                     ElevatedButton(
+                      key: const Key('save_button'),
                       onPressed: _newEntry,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue[50],
