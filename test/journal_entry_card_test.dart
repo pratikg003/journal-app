@@ -32,5 +32,5 @@ void main() {
       find.byType(JournalEntryCard),
       matchesGoldenFile('goldens/journal_entry_card.png'),
     );
-  });
+  }, tags: 'golden');
 }
