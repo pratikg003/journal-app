@@ -1,0 +1,35 @@
+name: Journal App CI
+
+# 1. When should this run?
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+# 2. What should it do?
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # A. Download your code
+      - uses: actions/checkout@v4
+
+      # B. Install Flutter on the cloud machine
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          # You can specify a version if needed, e.g., '3.19.0'
+
+      # C. Download packages (provider, etc.)
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # D. Check for code style errors (Linting)
+      - name: Analyze Code
+        run: flutter analyze
+
+      # E. Run Unit & Golden Tests
+      - name: Run Tests
+        run: flutter test
